@@ -71,6 +71,32 @@ local function parse_entries(xml, source_url)
             for key, value in link:gmatch('([%w:_-]+)%s*=%s*"([^"]*)"') do
                 attrs[key] = value
             end
+
+            local function list_stub_paths()
+                local handle = io.popen("find " .. util.shell_quote(paths.stub_dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
+                if not handle then
+                    return {}
+                end
+                local out = {}
+                for line in handle:lines() do
+                    out[#out + 1] = line
+                end
+                handle:close()
+                return out
+            end
+
+            local function find_existing_by_id(id)
+                if not id then
+                    return nil, nil
+                end
+                for _, candidate in ipairs(list_stub_paths()) do
+                    local existing = stub.load(candidate)
+                    if existing and existing.id == id then
+                        return candidate, existing
+                    end
+                end
+                return nil, nil
+            end
             for key, value in link:gmatch("([%w:_-]+)%s*=%s*'([^']*)'") do
                 if attrs[key] == nil then
                     attrs[key] = value
@@ -134,7 +160,15 @@ function opds.index_source(source)
         local item = stub.new(entry)
         local path = util.join(paths.stub_dir, item.hash .. ".kocloud")
         local existing = stub.load(path)
+        if not existing then
+            local existing_path, found = find_existing_by_id(item.id)
+            if found then
+                existing = found
+                path = existing_path
+            end
+        end
         if existing then
+            item.hash = existing.hash or item.hash
             if not item.cover_url then
                 item.cover_url = existing.cover_url
             end

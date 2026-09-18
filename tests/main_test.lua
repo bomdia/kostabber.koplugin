@@ -75,6 +75,7 @@ main_real_wizard:init()
 local fallback_state = util.load_json_table(paths.state, {})
 assert(fallback_state.first_run_completed == true)
 assert(indexed == 1)
+assert(util.file_exists(paths.sources) == false)
 
 -- clear mocks and test normal dispatch behavior
 package.loaded['sources'] = nil

@@ -89,6 +89,11 @@ function storage.evict_if_needed(stub_files, protected_stub_path)
     if policy == storage.policy.manual_unlimited then
         return
     end
+    if policy ~= storage.policy.none
+        and policy ~= storage.policy.fifo_cap
+        and policy ~= storage.policy.smart_inactivity then
+        return
+    end
 
     local entries = {}
     for _, stub_path in ipairs(stub_files or {}) do

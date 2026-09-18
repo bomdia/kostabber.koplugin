@@ -449,6 +449,10 @@ function util.json_decode(text)
     function parse_value()
         skip_ws()
         local c = text:sub(i, i)
+        local function token_boundary(next_index)
+            local n = text:sub(next_index, next_index)
+            return n == "" or not n:match("[%w_]")
+        end
         if c == '"' then
             return parse_string()
         elseif c == "{" then
@@ -457,13 +461,13 @@ function util.json_decode(text)
             return parse_array()
         elseif c:match("[%d%-]") then
             return parse_number()
-        elseif text:sub(i, i + 3) == "true" then
+        elseif text:sub(i, i + 3) == "true" and token_boundary(i + 4) then
             i = i + 4
             return true
-        elseif text:sub(i, i + 4) == "false" then
+        elseif text:sub(i, i + 4) == "false" and token_boundary(i + 5) then
             i = i + 5
             return false
-        elseif text:sub(i, i + 3) == "null" then
+        elseif text:sub(i, i + 3) == "null" and token_boundary(i + 4) then
             i = i + 4
             return JSON_NULL
         end
