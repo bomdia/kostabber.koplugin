@@ -1,0 +1,16 @@
+{
+  "files.associations": {
+    "*.kocloud": "lua"
+  },
+  "Lua.runtime.version": "Lua 5.1",
+  "Lua.workspace.library": [
+    "${workspaceFolder}"
+  ],
+  "Lua.diagnostics.globals": [
+    "bit32"
+  ],
+  "search.exclude": {
+    "**/.git": true,
+    "**/tmp": true
+  }
+}
