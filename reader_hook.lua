@@ -86,7 +86,7 @@ function reader_hook.resolve_local_path(stub_path)
     item.last_access_ts = util.now()
     stub.save(stub_path, item)
     storage.record_access(item.hash)
-    storage.evict_if_needed(list_stub_files(paths.stub_dir, stub_path))
+    storage.evict_if_needed(list_stub_files(paths.stub_dir), stub_path)
     notify.show("KoStabber: asset pronto in cache")
     return local_path
 end

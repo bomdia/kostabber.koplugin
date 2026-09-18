@@ -335,6 +335,9 @@ function util.json_decode(text)
         local function current_char()
             return text:sub(i, i)
         end
+        local function is_digit(ch)
+            return ch ~= "" and ch >= "0" and ch <= "9"
+        end
 
         if current_char() == "-" then
             i = i + 1
@@ -343,12 +346,12 @@ function util.json_decode(text)
         local first = current_char()
         if first == "0" then
             i = i + 1
-            if current_char():match("^%d$") then
+            if i <= len and is_digit(current_char()) then
                 return PARSE_ERROR
             end
-        elseif first:match("^[1-9]$") then
+        elseif first >= "1" and first <= "9" then
             i = i + 1
-            while current_char():match("^%d$") do
+            while i <= len and is_digit(current_char()) do
                 i = i + 1
             end
         else
@@ -357,10 +360,10 @@ function util.json_decode(text)
 
         if current_char() == "." then
             i = i + 1
-            if not current_char():match("^%d$") then
+            if i > len or not is_digit(current_char()) then
                 return PARSE_ERROR
             end
-            while current_char():match("^%d$") do
+            while i <= len and is_digit(current_char()) do
                 i = i + 1
             end
         end
@@ -370,10 +373,10 @@ function util.json_decode(text)
             if current_char() == "+" or current_char() == "-" then
                 i = i + 1
             end
-            if not current_char():match("^%d$") then
+            if i > len or not is_digit(current_char()) then
                 return PARSE_ERROR
             end
-            while current_char():match("^%d$") do
+            while i <= len and is_digit(current_char()) do
                 i = i + 1
             end
         end

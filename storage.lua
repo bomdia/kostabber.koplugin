@@ -77,7 +77,7 @@ local function should_remove_smart(ledger, last_access)
     return (util.now() - (last_access or 0)) > inactive_seconds
 end
 
-function storage.evict_if_needed(stub_files)
+function storage.evict_if_needed(stub_files, protected_stub_path)
     local ledger = load_ledger()
     local policy = ledger.policy
     if policy == storage.policy.manual_unlimited then
@@ -98,7 +98,9 @@ function storage.evict_if_needed(stub_files)
 
     if policy == storage.policy.none then
         for _, e in ipairs(entries) do
-            remove_local_asset(e.path, e.item)
+            if e.path ~= protected_stub_path then
+                remove_local_asset(e.path, e.item)
+            end
         end
         return
     end
@@ -110,7 +112,14 @@ function storage.evict_if_needed(stub_files)
     if policy == storage.policy.fifo_cap then
         local cap = tonumber(ledger.fifo_cap) or 50
         while #entries > cap do
-            local evict = table.remove(entries, 1)
+            local evict_index = 1
+            while entries[evict_index] and entries[evict_index].path == protected_stub_path do
+                evict_index = evict_index + 1
+            end
+            local evict = table.remove(entries, evict_index)
+            if not evict then
+                break
+            end
             remove_local_asset(evict.path, evict.item)
         end
         return
@@ -120,14 +129,21 @@ function storage.evict_if_needed(stub_files)
         local max_assets = tonumber(ledger.max_assets) or 200
         local kept = {}
         for _, e in ipairs(entries) do
-            if should_remove_smart(ledger, e.last_access) then
+            if e.path ~= protected_stub_path and should_remove_smart(ledger, e.last_access) then
                 remove_local_asset(e.path, e.item)
             else
                 kept[#kept + 1] = e
             end
         end
         while #kept > max_assets do
-            local evict = table.remove(kept, 1)
+            local evict_index = 1
+            while kept[evict_index] and kept[evict_index].path == protected_stub_path do
+                evict_index = evict_index + 1
+            end
+            local evict = table.remove(kept, evict_index)
+            if not evict then
+                break
+            end
             remove_local_asset(evict.path, evict.item)
         end
     end
