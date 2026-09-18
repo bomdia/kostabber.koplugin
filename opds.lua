@@ -71,32 +71,6 @@ local function parse_entries(xml, source_url)
             for key, value in link:gmatch('([%w:_-]+)%s*=%s*"([^"]*)"') do
                 attrs[key] = value
             end
-
-            local function list_stub_paths()
-                local handle = io.popen("find " .. util.shell_quote(paths.stub_dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
-                if not handle then
-                    return {}
-                end
-                local out = {}
-                for line in handle:lines() do
-                    out[#out + 1] = line
-                end
-                handle:close()
-                return out
-            end
-
-            local function find_existing_by_id(id)
-                if not id then
-                    return nil, nil
-                end
-                for _, candidate in ipairs(list_stub_paths()) do
-                    local existing = stub.load(candidate)
-                    if existing and existing.id == id then
-                        return candidate, existing
-                    end
-                end
-                return nil, nil
-            end
             for key, value in link:gmatch("([%w:_-]+)%s*=%s*'([^']*)'") do
                 if attrs[key] == nil then
                     attrs[key] = value
@@ -125,6 +99,32 @@ local function parse_entries(xml, source_url)
         end
     end
     return entries
+end
+
+local function list_stub_paths()
+    local handle = io.popen("find " .. util.shell_quote(paths.stub_dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
+    if not handle then
+        return {}
+    end
+    local out = {}
+    for line in handle:lines() do
+        out[#out + 1] = line
+    end
+    handle:close()
+    return out
+end
+
+local function find_existing_by_id(id)
+    if not id then
+        return nil, nil
+    end
+    for _, candidate in ipairs(list_stub_paths()) do
+        local existing = stub.load(candidate)
+        if existing and existing.id == id then
+            return candidate, existing
+        end
+    end
+    return nil, nil
 end
 
 local function fetch(url)

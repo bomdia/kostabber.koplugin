@@ -104,4 +104,20 @@ assert(notifications[#notifications]:match('download fallito'))
 
 util.command_success = old_command_success
 
+-- missing URL branch
+local missing_url_stub = paths.stub_dir .. '/missing-url.kocloud'
+stub.save(missing_url_stub, {
+    format_version = 1,
+    id = 'missing-url',
+    title = 'Missing URL',
+    authors = { 'D' },
+    hash = 'missing-url-hash',
+    local_asset_path = nil,
+    last_access_ts = 0,
+    read_progress = { position = '', timestamp = 0 },
+})
+local no_url_path, no_url_err = reader_hook.resolve_local_path(missing_url_stub)
+assert(no_url_path == nil)
+assert(no_url_err == 'missing_remote_download_url')
+
 print('reader_hook tests passed')

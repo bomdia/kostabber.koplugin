@@ -54,6 +54,9 @@ end
 
 function util.shell_quote(s)
     s = tostring(s or "")
+    if package.config:sub(1, 1) == "\\" then
+        return '"' .. s:gsub('"', '\\"') .. '"'
+    end
     return "'" .. s:gsub("'", "'\\''") .. "'"
 end
 
@@ -61,8 +64,7 @@ function util.mkdir_p(path)
     if not path or path == "" then
         return true
     end
-    util.command_success("mkdir -p " .. util.shell_quote(path))
-    return true
+    return util.command_success("mkdir -p " .. util.shell_quote(path))
 end
 
 function util.now()
