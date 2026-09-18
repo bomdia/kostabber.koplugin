@@ -111,11 +111,17 @@ function storage.evict_if_needed(stub_files)
 
     if policy == storage.policy.smart_inactivity then
         local max_assets = tonumber(ledger.max_assets) or 200
-        local over_threshold = #entries > max_assets
+        local kept = {}
         for _, e in ipairs(entries) do
-            if over_threshold and should_remove_smart(ledger, e.last_access) then
+            if should_remove_smart(ledger, e.last_access) then
                 remove_local_asset(e.path, e.item)
+            else
+                kept[#kept + 1] = e
             end
+        end
+        while #kept > max_assets do
+            local evict = table.remove(kept, 1)
+            remove_local_asset(evict.path, evict.item)
         end
     end
 end

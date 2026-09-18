@@ -4,7 +4,7 @@ local paths = require("paths")
 local cover_cache = {}
 
 local function ext_from_url(url)
-    local ext = url and url:match("%.([a-zA-Z0-9]+)$")
+    local ext = url and url:match("%.([a-zA-Z0-9]+)(%?.*)?$")
     return ext and #ext <= 5 and ext or "jpg"
 end
 

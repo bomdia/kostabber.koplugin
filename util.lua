@@ -164,6 +164,9 @@ function util.load_lua_table(path, fallback)
     if not chunk then
         return fallback, err
     end
+    if setfenv then
+        setfenv(chunk, {})
+    end
     local ok, result = pcall(chunk)
     if not ok or type(result) ~= "table" then
         return fallback, result
