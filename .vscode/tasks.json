@@ -4,7 +4,7 @@
     {
       "label": "lua:syntax-check",
       "type": "shell",
-      "command": "for f in *.lua tests/*.lua; do luac -p \"$f\" || exit 1; done",
+      "command": "make syntax-check",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -13,9 +13,9 @@
     {
       "label": "lua:run-focused-tests",
       "type": "shell",
-      "command": "lua main_test.lua && lua reader_hook_test.lua && lua wizard_test.lua",
+      "command": "make test",
       "options": {
-        "cwd": "${workspaceFolder}/tests"
+        "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
     },

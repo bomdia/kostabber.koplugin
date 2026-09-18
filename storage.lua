@@ -31,6 +31,12 @@ local function load_ledger()
             ledger[k] = v
         end
     end
+    if ledger.policy ~= storage.policy.none
+        and ledger.policy ~= storage.policy.manual_unlimited
+        and ledger.policy ~= storage.policy.fifo_cap
+        and ledger.policy ~= storage.policy.smart_inactivity then
+        ledger.policy = storage.policy.manual_unlimited
+    end
     if type(ledger.items) ~= "table" then
         ledger.items = {}
     end

@@ -13,7 +13,11 @@ function util.join(...)
     local out = {}
     for _, part in ipairs(parts) do
         if part and part ~= "" then
-            out[#out + 1] = tostring(part):gsub(sep .. "+$", "")
+            local p = tostring(part)
+            while #p > 1 and p:sub(-1) == sep do
+                p = p:sub(1, -2)
+            end
+            out[#out + 1] = p
         end
     end
     return table.concat(out, sep)
@@ -153,7 +157,7 @@ local function serialize_value(value, depth)
 end
 
 function util.save_lua_table(path, tbl)
-    return util.write_file(path, "return " .. serialize_value(tbl) .. "\n")
+    return util.write_file(path, util.json_encode(tbl))
 end
 
 function util.load_lua_table(path, fallback)
@@ -161,39 +165,12 @@ function util.load_lua_table(path, fallback)
         return fallback
     end
     local content = util.read_file(path)
-    if not content then
+    if not content or content == "" then
         return fallback
     end
-    if #content > 1024 * 1024 then
-        return fallback, "unsafe_file_size"
-    end
-    if not content:match("^%s*return%s*{") then
-        return fallback, "unsafe_prefix"
-    end
-    local chunk
-    local err
-    if _VERSION == "Lua 5.1" then
-        chunk, err = loadstring(content, "@" .. path)
-        if not chunk then
-            return fallback, err
-        end
-        if setfenv then
-            setfenv(chunk, {})
-        end
-    else
-        local ok, loaded, load_err = pcall(load, content, "@" .. path, "t", {})
-        if ok then
-            chunk, err = loaded, load_err
-        else
-            chunk, err = nil, loaded
-        end
-    end
-    if not chunk then
-        return fallback, err
-    end
-    local ok, result = pcall(chunk)
-    if not ok or type(result) ~= "table" then
-        return fallback, result
+    local result = util.json_decode(content)
+    if type(result) ~= "table" then
+        return fallback, "invalid_json"
     end
     return result
 end
