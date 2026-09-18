@@ -19,8 +19,16 @@ local function list_stub_files(dir)
     return out
 end
 
+local function extension_from_item(item)
+    local ext = item.remote_download_url and item.remote_download_url:match("%.([a-zA-Z0-9]+)(%?.*)?$")
+    if ext and #ext <= 5 then
+        return ext:lower()
+    end
+    return "epub"
+end
+
 local function download_asset(url, stub_hash)
-    local target = util.join(paths.asset_dir, stub_hash .. ".epub")
+    local target = util.join(paths.asset_dir, stub_hash .. "." .. extension_from_item({ remote_download_url = url }))
     local ok_http, http = pcall(require, "network/http")
     if ok_http and http and http.request then
         local ok, res = pcall(http.request, url, { method = "GET" })

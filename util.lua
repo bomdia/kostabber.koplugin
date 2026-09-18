@@ -109,7 +109,7 @@ local function serialize_value(value, depth)
         return "nil"
     elseif t == "number" then
         if value ~= value or value == math.huge or value == -math.huge then
-            return "null"
+            return "nil"
         end
         return tostring(value)
     elseif t == "boolean" then
@@ -193,7 +193,12 @@ function util.json_encode(value)
     local t = type(value)
     if t == "nil" then
         return "null"
-    elseif t == "number" or t == "boolean" then
+    elseif t == "number" then
+        if value ~= value or value == math.huge or value == -math.huge then
+            return "null"
+        end
+        return tostring(value)
+    elseif t == "boolean" then
         return tostring(value)
     elseif t == "string" then
         return '"' .. json_escape(value) .. '"'

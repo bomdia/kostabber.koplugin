@@ -11,7 +11,32 @@ local function xml_unescape(s)
     return (s or ""):gsub("&amp;", "&"):gsub("&lt;", "<"):gsub("&gt;", ">"):gsub("&quot;", '"'):gsub("&apos;", "'")
 end
 
-local function parse_entries(xml)
+local function resolve_url(base_url, href)
+    if not href or href == "" then
+        return href
+    end
+    if href:match("^https?://") then
+        return href
+    end
+    if href:match("^//") then
+        local scheme = (base_url and base_url:match("^(https?):")) or "http"
+        return scheme .. ":" .. href
+    end
+    if not base_url or base_url == "" then
+        return href
+    end
+    local origin = base_url:match("^(https?://[^/]+)")
+    if href:sub(1, 1) == "/" and origin then
+        return origin .. href
+    end
+    local base_dir = base_url:match("^(https?://.*/)")
+    if not base_dir and origin then
+        base_dir = origin .. "/"
+    end
+    return (base_dir or "") .. href
+end
+
+local function parse_entries(xml, source_url)
     local entries = {}
     for entry_xml in xml:gmatch("<entry[%s%S]-</entry>") do
         local id = entry_xml:match("<id>([%s%S]-)</id>")
@@ -45,8 +70,8 @@ local function parse_entries(xml)
                 authors = author and { xml_unescape(author:gsub("^%s+", ""):gsub("%s+$", "")) } or {},
                 series = series and xml_unescape(series) or nil,
                 series_index = series_index,
-                remote_download_url = xml_unescape(download_url),
-                cover_url = cover_url and xml_unescape(cover_url) or nil,
+                remote_download_url = resolve_url(source_url, xml_unescape(download_url)),
+                cover_url = cover_url and resolve_url(source_url, xml_unescape(cover_url)) or nil,
             }
         end
     end
@@ -79,7 +104,7 @@ function opds.index_source(source)
         return 0, "fetch_failed"
     end
 
-    local entries = parse_entries(xml)
+    local entries = parse_entries(xml, source.url)
     for _, entry in ipairs(entries) do
         local item = stub.new(entry)
         local path = util.join(paths.stub_dir, item.hash .. ".kocloud")
