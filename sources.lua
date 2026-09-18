@@ -12,7 +12,7 @@ end
 
 function sources.load()
     paths.ensure()
-    return util.load_lua_table(paths.sources, {}) or {}
+    return util.load_json_table(paths.sources, {}) or {}
 end
 
 function sources.save(list)
@@ -23,7 +23,7 @@ function sources.save(list)
             normalized[#normalized + 1] = normalize_source(src)
         end
     end
-    return util.save_lua_table(paths.sources, normalized)
+    return util.save_json_table(paths.sources, normalized)
 end
 
 function sources.add(name, url)

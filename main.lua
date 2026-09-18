@@ -9,11 +9,11 @@ local KoStabber = {
 }
 
 local function load_state()
-    return util.load_lua_table(paths.state, { first_run_completed = false }) or { first_run_completed = false }
+    return util.load_json_table(paths.state, { first_run_completed = false }) or { first_run_completed = false }
 end
 
 local function save_state(state)
-    return util.save_lua_table(paths.state, state)
+    return util.save_json_table(paths.state, state)
 end
 
 function KoStabber:init()

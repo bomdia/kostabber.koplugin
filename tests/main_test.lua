@@ -3,8 +3,8 @@ package.path = '../?.lua;./?.lua;' .. package.path
 local util = require('util')
 local paths = require('paths')
 paths.base = '/tmp/kostabber-main-test'
-paths.sources = paths.base .. '/sources.lua'
-paths.state = paths.base .. '/state.lua'
+paths.sources = paths.base .. '/sources.json'
+paths.state = paths.base .. '/state.json'
 paths.stub_dir = paths.base .. '/sync'
 paths.cover_cache_dir = paths.base .. '/cache/covers'
 paths.asset_dir = paths.base .. '/assets'
@@ -31,17 +31,17 @@ package.loaded['wizard'] = {
 local main_init = dofile('../main.lua')
 main_init:init()
 assert(wizard_called == true)
-local before_state = util.load_lua_table(paths.state, {})
+local before_state = util.load_json_table(paths.state, {})
 assert(before_state.first_run_completed ~= true)
 assert(type(deferred_finish) == 'function')
 deferred_finish()
-local state = util.load_lua_table(paths.state, {})
+local state = util.load_json_table(paths.state, {})
 assert(state.first_run_completed == true)
 
 -- init() real wizard fallback path without UI
 paths.base = '/tmp/kostabber-main-test-fallback'
-paths.sources = paths.base .. '/sources.lua'
-paths.state = paths.base .. '/state.lua'
+paths.sources = paths.base .. '/sources.json'
+paths.state = paths.base .. '/state.json'
 paths.stub_dir = paths.base .. '/sync'
 paths.cover_cache_dir = paths.base .. '/cache/covers'
 paths.asset_dir = paths.base .. '/assets'
@@ -66,7 +66,7 @@ package.loaded['ui/widget/inputdialog'] = nil
 package.loaded['ui/uimanager'] = nil
 local main_real_wizard = dofile('../main.lua')
 main_real_wizard:init()
-local fallback_state = util.load_lua_table(paths.state, {})
+local fallback_state = util.load_json_table(paths.state, {})
 assert(fallback_state.first_run_completed == true)
 assert(indexed == 1)
 

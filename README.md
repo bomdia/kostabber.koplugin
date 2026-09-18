@@ -19,8 +19,8 @@ KoStabber è un plugin KOReader che indicizza feed OPDS e crea stub `.kocloud` p
 
 Configurabile con variabile `KOSTABBER_HOME` (default `~/.config/koreader/kostabber`):
 
-- `sources.lua`
-- `state.lua`
+- `sources.json`
+- `state.json`
 - `sync/*.kocloud`
 - `cache/covers/*`
 - `assets/*`

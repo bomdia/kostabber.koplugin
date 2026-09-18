@@ -19,7 +19,8 @@ jobs:
       - name: Install Lua and zip
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.1 zip
+          sudo apt-get install -y lua5.1 lua5.1-dev zip
+          command -v luac || command -v luac5.1
 
       - name: Build artifact
         run: make release-build

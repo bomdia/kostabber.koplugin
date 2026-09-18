@@ -157,16 +157,32 @@ local function serialize_value(value, depth)
 end
 
 function util.save_lua_table(path, tbl)
-    return util.write_file(path, util.json_encode(tbl))
+    return util.write_file(path, "return " .. serialize_value(tbl) .. "\n")
 end
 
 function util.load_lua_table(path, fallback)
+    return fallback, "disabled_for_safety"
+end
+
+function util.save_json_table(path, tbl)
+    return util.write_file(path, util.json_encode(tbl))
+end
+
+function util.load_json_table(path, fallback)
     if not util.file_exists(path) then
         return fallback
     end
     local content = util.read_file(path)
     if not content or content == "" then
         return fallback
+    end
+    local ok_dk, dkjson = pcall(require, "dkjson")
+    if ok_dk and dkjson and dkjson.decode then
+        local value, _, err = dkjson.decode(content)
+        if err or type(value) ~= "table" then
+            return fallback, err or "invalid_json"
+        end
+        return value
     end
     local result = util.json_decode(content)
     if type(result) ~= "table" then
@@ -233,11 +249,6 @@ function util.json_decode(text)
     if not text or text == "" then
         return nil
     end
-    local ok_dk, dkjson = pcall(require, "dkjson")
-    if ok_dk and dkjson and dkjson.decode then
-        return dkjson.decode(text)
-    end
-
     local i = 1
     local len = #text
 

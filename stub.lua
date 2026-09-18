@@ -22,11 +22,11 @@ function stub.new(entry)
 end
 
 function stub.save(path, obj)
-    return util.save_lua_table(path, obj)
+    return util.save_json_table(path, obj)
 end
 
 function stub.load(path)
-    return util.load_lua_table(path, nil)
+    return util.load_json_table(path, nil)
 end
 
 return stub

@@ -6,7 +6,7 @@ local notify = require("notify")
 
 local reader_hook = {}
 
-local function list_stub_files(dir, skip_path)
+local function list_stub_files(dir)
     local cmd
     if package.config:sub(1, 1) == "\\" then
         cmd = 'dir /b /a-d "' .. dir:gsub("/", "\\") .. '\\*.kocloud" 2> NUL'
@@ -23,9 +23,7 @@ local function list_stub_files(dir, skip_path)
         if package.config:sub(1, 1) == "\\" and not line:match("^[A-Za-z]:\\") then
             path = util.join(dir, line)
         end
-        if path ~= skip_path then
-            out[#out + 1] = path
-        end
+        out[#out + 1] = path
     end
     handle:close()
     return out
