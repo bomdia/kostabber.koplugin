@@ -25,15 +25,33 @@ local function resolve_url(base_url, href)
     if not base_url or base_url == "" then
         return href
     end
+    local function normalize_path(path)
+        local stack = {}
+        for seg in path:gmatch("[^/]+") do
+            if seg == ".." then
+                if #stack > 0 then
+                    table.remove(stack)
+                end
+            elseif seg ~= "." and seg ~= "" then
+                stack[#stack + 1] = seg
+            end
+        end
+        return "/" .. table.concat(stack, "/")
+    end
     local origin = base_url:match("^(https?://[^/]+)")
     if href:sub(1, 1) == "/" and origin then
-        return origin .. href
+        return origin .. normalize_path(href)
     end
     local base_dir = base_url:match("^(https?://.*/)")
     if not base_dir and origin then
         base_dir = origin .. "/"
     end
-    return (base_dir or "") .. href
+    local merged = (base_dir or "") .. href
+    local prefix, path = merged:match("^(https?://[^/]+)(/.*)$")
+    if prefix and path then
+        return prefix .. normalize_path(path)
+    end
+    return merged
 end
 
 local function parse_entries(xml, source_url)

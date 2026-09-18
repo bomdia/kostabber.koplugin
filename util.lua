@@ -1,4 +1,7 @@
 local util = {}
+local JSON_NULL = {}
+local PARSE_ERROR = {}
+util.json_null = JSON_NULL
 
 local function path_sep()
     return package.config:sub(1, 1)
@@ -190,6 +193,9 @@ local function json_escape(s)
 end
 
 function util.json_encode(value)
+    if value == JSON_NULL then
+        return "null"
+    end
     local t = type(value)
     if t == "nil" then
         return "null"
@@ -256,7 +262,7 @@ function util.json_decode(text)
                 elseif esc == "u" then
                     local hex = text:sub(i + 2, i + 5)
                     if not hex:match("^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$") then
-                        return nil
+                        return PARSE_ERROR
                     end
                     local cp = tonumber(hex, 16)
                     if cp <= 0x7F then
@@ -273,14 +279,14 @@ function util.json_decode(text)
                     end
                     i = i + 6
                 else
-                    return nil
+                    return PARSE_ERROR
                 end
             else
                 out[#out + 1] = c
                 i = i + 1
             end
         end
-        return nil
+        return PARSE_ERROR
     end
 
     local function parse_number()
@@ -288,7 +294,11 @@ function util.json_decode(text)
         while i <= len and text:sub(i, i):match("[%d%+%-%.eE]") do
             i = i + 1
         end
-        return tonumber(text:sub(start_i, i - 1))
+        local n = tonumber(text:sub(start_i, i - 1))
+        if n == nil then
+            return PARSE_ERROR
+        end
+        return n
     end
 
     local function parse_array()
@@ -301,6 +311,9 @@ function util.json_decode(text)
         end
         while i <= len do
             local v = parse_value()
+            if v == PARSE_ERROR then
+                return PARSE_ERROR
+            end
             arr[#arr + 1] = v
             skip_ws()
             local c = text:sub(i, i)
@@ -310,11 +323,11 @@ function util.json_decode(text)
             elseif c == "," then
                 i = i + 1
             else
-                return nil
+                return PARSE_ERROR
             end
             skip_ws()
         end
-        return nil
+        return PARSE_ERROR
     end
 
     local function parse_object()
@@ -327,16 +340,23 @@ function util.json_decode(text)
         end
         while i <= len do
             if text:sub(i, i) ~= '"' then
-                return nil
+                return PARSE_ERROR
             end
             local key = parse_string()
+            if key == PARSE_ERROR then
+                return PARSE_ERROR
+            end
             skip_ws()
             if text:sub(i, i) ~= ":" then
-                return nil
+                return PARSE_ERROR
             end
             i = i + 1
             skip_ws()
-            obj[key] = parse_value()
+            local parsed = parse_value()
+            if parsed == PARSE_ERROR then
+                return PARSE_ERROR
+            end
+            obj[key] = parsed
             skip_ws()
             local c = text:sub(i, i)
             if c == "}" then
@@ -345,11 +365,11 @@ function util.json_decode(text)
             elseif c == "," then
                 i = i + 1
             else
-                return nil
+                return PARSE_ERROR
             end
             skip_ws()
         end
-        return nil
+        return PARSE_ERROR
     end
 
     function parse_value()
@@ -371,12 +391,15 @@ function util.json_decode(text)
             return false
         elseif text:sub(i, i + 3) == "null" then
             i = i + 4
-            return nil
+            return JSON_NULL
         end
-        return nil
+        return PARSE_ERROR
     end
 
     local value = parse_value()
+    if value == PARSE_ERROR then
+        return nil
+    end
     skip_ws()
     if i <= len then
         return nil

@@ -29,7 +29,8 @@ function cover_cache.ensure(url)
     local ok_http, http = pcall(require, "network/http")
     if ok_http and http and http.request then
         local ok, res = pcall(http.request, url, { method = "GET" })
-        if ok and res and res.body then
+        local status = ok and res and tonumber(res.status or res.code or 0) or 0
+        if ok and res and res.body and status > 0 and status < 400 then
             util.write_file(target, res.body)
             return target
         end
