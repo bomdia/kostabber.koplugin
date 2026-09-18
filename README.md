@@ -45,3 +45,9 @@ Comandi principali:
 Output:
 
 - `kostabber.koplugin-<version>.zip` pronto da installare/testare su KOReader.
+
+## Coder
+
+`.coder/` contiene un template Terraform per creare un workspace Coder
+Docker-based con Lua 5.1, `make` e `zip` preinstallati. Per istruzioni su
+deploy e accesso al workspace, vedere [`.coder/README.md`](`.coder/README.md`).
