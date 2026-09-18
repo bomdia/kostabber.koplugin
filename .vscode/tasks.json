@@ -18,6 +18,15 @@
         "cwd": "${workspaceFolder}/tests"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "release:build-plugin-zip",
+      "type": "shell",
+      "command": "make release-build",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ]
 }

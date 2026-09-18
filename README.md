@@ -32,4 +32,16 @@ La cartella `.vscode/` include:
 
 - `extensions.json`: estensioni consigliate (LuaLS, EditorConfig)
 - `settings.json`: associazioni file e runtime Lua 5.1
-- `tasks.json`: task rapidi per syntax check e test focalizzati
+- `tasks.json`: task rapidi per syntax check, test focalizzati e build release
+
+## Build release plugin
+
+Comandi principali:
+
+- `make syntax-check`
+- `make test`
+- `make release-build`
+
+Output:
+
+- `kostabber.koplugin-<version>.zip` pronto da installare/testare su KOReader.
