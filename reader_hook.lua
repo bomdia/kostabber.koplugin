@@ -6,14 +6,16 @@ local notify = require("notify")
 
 local reader_hook = {}
 
-local function list_stub_files(dir)
+local function list_stub_files(dir, skip_path)
     local handle = io.popen("find " .. util.shell_quote(dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
     if not handle then
         return {}
     end
     local out = {}
     for line in handle:lines() do
-        out[#out + 1] = line
+        if line ~= skip_path then
+            out[#out + 1] = line
+        end
     end
     handle:close()
     return out
@@ -74,7 +76,7 @@ function reader_hook.resolve_local_path(stub_path)
     item.last_access_ts = util.now()
     stub.save(stub_path, item)
     storage.record_access(item.hash)
-    storage.evict_if_needed(list_stub_files(paths.stub_dir))
+    storage.evict_if_needed(list_stub_files(paths.stub_dir, stub_path))
     notify.show("KoStabber: asset pronto in cache")
     return local_path
 end

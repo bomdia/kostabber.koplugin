@@ -160,12 +160,25 @@ function util.load_lua_table(path, fallback)
     if not util.file_exists(path) then
         return fallback
     end
-    local chunk, err = loadfile(path)
+    local content = util.read_file(path)
+    if not content then
+        return fallback
+    end
+
+    local chunk
+    local err
+    if _VERSION == "Lua 5.1" then
+        chunk, err = loadstring(content, "@" .. path)
+        if chunk and setfenv then
+            setfenv(chunk, {})
+        else
+            return fallback, "unsafe_runtime"
+        end
+    else
+        chunk, err = load(content, "@" .. path, "t", {})
+    end
     if not chunk then
         return fallback, err
-    end
-    if setfenv then
-        setfenv(chunk, {})
     end
     local ok, result = pcall(chunk)
     if not ok or type(result) ~= "table" then
@@ -268,19 +281,36 @@ function util.json_decode(text)
                         return PARSE_ERROR
                     end
                     local cp = tonumber(hex, 16)
+                    local advance = 6
+                    if cp >= 0xD800 and cp <= 0xDBFF and text:sub(i + 6, i + 7) == "\\u" then
+                        local hex2 = text:sub(i + 8, i + 11)
+                        if hex2:match("^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$") then
+                            local cp2 = tonumber(hex2, 16)
+                            if cp2 >= 0xDC00 and cp2 <= 0xDFFF then
+                                cp = 0x10000 + ((cp - 0xD800) * 0x400) + (cp2 - 0xDC00)
+                                advance = 12
+                            end
+                        end
+                    end
                     if cp <= 0x7F then
                         out[#out + 1] = string.char(cp)
                     elseif cp <= 0x7FF then
                         local b1 = 0xC0 + math.floor(cp / 0x40)
                         local b2 = 0x80 + (cp % 0x40)
                         out[#out + 1] = string.char(b1, b2)
-                    else
+                    elseif cp <= 0xFFFF then
                         local b1 = 0xE0 + math.floor(cp / 0x1000)
                         local b2 = 0x80 + (math.floor(cp / 0x40) % 0x40)
                         local b3 = 0x80 + (cp % 0x40)
                         out[#out + 1] = string.char(b1, b2, b3)
+                    else
+                        local b1 = 0xF0 + math.floor(cp / 0x40000)
+                        local b2 = 0x80 + (math.floor(cp / 0x1000) % 0x40)
+                        local b3 = 0x80 + (math.floor(cp / 0x40) % 0x40)
+                        local b4 = 0x80 + (cp % 0x40)
+                        out[#out + 1] = string.char(b1, b2, b3, b4)
                     end
-                    i = i + 6
+                    i = i + advance
                 else
                     return PARSE_ERROR
                 end

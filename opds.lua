@@ -105,7 +105,7 @@ local function fetch(url)
             return res.body
         end
     end
-    local tmp_path = util.join(paths.base, "_opds.xml")
+    local tmp_path = util.join(paths.base, string.format("_opds_%s_%d.xml", util.sha1_like(url), util.now()))
     local ok_curl = util.command_success("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(tmp_path))
     if ok_curl then
         local body = util.read_file(tmp_path)

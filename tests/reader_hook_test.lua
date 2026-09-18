@@ -9,6 +9,7 @@ paths.stub_dir = paths.base .. '/sync'
 paths.cover_cache_dir = paths.base .. '/cache/covers'
 paths.asset_dir = paths.base .. '/assets'
 paths.storage_ledger = paths.base .. '/storage_ledger.json'
+util.command_success("rm -rf " .. util.shell_quote(paths.base))
 paths.ensure()
 
 local stub = require('stub')

@@ -9,6 +9,7 @@ paths.stub_dir = paths.base .. '/sync'
 paths.cover_cache_dir = paths.base .. '/cache/covers'
 paths.asset_dir = paths.base .. '/assets'
 paths.storage_ledger = paths.base .. '/storage_ledger.json'
+util.command_success("rm -rf " .. util.shell_quote(paths.base))
 paths.ensure()
 
 -- init() first-run path
@@ -19,18 +20,21 @@ package.loaded['sources'] = {
 }
 
 local wizard_called = false
+local deferred_finish
 package.loaded['wizard'] = {
     run_first_time = function(on_finished)
         wizard_called = true
-        if on_finished then
-            on_finished()
-        end
+        deferred_finish = on_finished
     end,
 }
 
 local main_init = dofile('../main.lua')
 main_init:init()
 assert(wizard_called == true)
+local before_state = util.load_lua_table(paths.state, {})
+assert(before_state.first_run_completed ~= true)
+assert(type(deferred_finish) == 'function')
+deferred_finish()
 local state = util.load_lua_table(paths.state, {})
 assert(state.first_run_completed == true)
 
