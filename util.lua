@@ -156,14 +156,6 @@ local function serialize_value(value, depth)
     return "nil"
 end
 
-function util.save_lua_table(path, tbl)
-    return util.write_file(path, "return " .. serialize_value(tbl) .. "\n")
-end
-
-function util.load_lua_table(path, fallback)
-    return fallback, "disabled_for_safety"
-end
-
 function util.save_json_table(path, tbl)
     return util.write_file(path, util.json_encode(tbl))
 end

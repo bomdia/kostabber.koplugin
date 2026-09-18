@@ -17,6 +17,9 @@ package.loaded['sources'] = {
     is_configured = function()
         return false
     end,
+    load = function()
+        return {}
+    end,
 }
 
 local wizard_called = false
@@ -53,6 +56,9 @@ local indexed = 0
 package.loaded['sources'] = {
     is_configured = function()
         return false
+    end,
+    load = function()
+        return {}
     end,
 }
 package.loaded['opds'] = {

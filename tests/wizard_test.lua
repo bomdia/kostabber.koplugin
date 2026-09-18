@@ -32,27 +32,27 @@ wizard.run_first_time(function()
     finished = true
 end)
 assert(finished == true)
-assert(indexed == 1)
+assert(indexed == 0)
 
 local valid, total = wizard.configure_sources({ { name = 'A', url = 'https://x' } }, true)
 assert(#valid == 1)
 assert(saved_sources and #saved_sources == 1)
 assert(total == 0)
-assert(indexed == 2)
+assert(indexed == 1)
 
 allow_connection = false
 local filtered, total2 = wizard.configure_sources({ { name = 'B', url = 'https://y' } }, true)
 assert(#filtered == 0)
 assert(saved_sources and #saved_sources == 0)
 assert(total2 == 0)
-assert(indexed == 3)
+assert(indexed == 2)
 
 allow_connection = false
 local unchecked, total3 = wizard.configure_sources({ { name = 'C', url = 'https://z' } }, false)
 assert(#unchecked == 1)
 assert(saved_sources and #saved_sources == 1)
 assert(total3 == 0)
-assert(indexed == 4)
+assert(indexed == 3)
 
 -- parse UI multiline input, keep only valid Nome|URL lines
 local fake_input = "One|https://one\nbadline\nTwo|https://two\nNoUrl|\n|NoName"
@@ -75,6 +75,6 @@ local wizard_with_ui = dofile('../wizard.lua')
 wizard_with_ui.run_first_time(function() end)
 assert(saved_sources and #saved_sources == 2)
 assert(saved_sources[1].name == 'One' and saved_sources[2].name == 'Two')
-assert(indexed == 5)
+assert(indexed == 3)
 
 print('wizard tests passed')

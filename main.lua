@@ -23,6 +23,7 @@ function KoStabber:init()
 
     if first_run then
         wizard.run_first_time(function()
+            opds.initial_index_all()
             state.first_run_completed = true
             save_state(state)
         end)

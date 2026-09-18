@@ -67,7 +67,6 @@ function wizard.run_first_time(on_finished)
             return
         end
         done = true
-        opds.initial_index_all()
         if on_finished then
             on_finished()
         end
