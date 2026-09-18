@@ -7,14 +7,24 @@ local notify = require("notify")
 local reader_hook = {}
 
 local function list_stub_files(dir, skip_path)
-    local handle = io.popen("find " .. util.shell_quote(dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
+    local cmd
+    if package.config:sub(1, 1) == "\\" then
+        cmd = 'dir /b /a-d "' .. dir:gsub("/", "\\") .. '\\*.kocloud" 2> NUL'
+    else
+        cmd = "find " .. util.shell_quote(dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null"
+    end
+    local handle = io.popen(cmd)
     if not handle then
         return {}
     end
     local out = {}
     for line in handle:lines() do
-        if line ~= skip_path then
-            out[#out + 1] = line
+        local path = line
+        if package.config:sub(1, 1) == "\\" and not line:match("^[A-Za-z]:\\") then
+            path = util.join(dir, line)
+        end
+        if path ~= skip_path then
+            out[#out + 1] = path
         end
     end
     handle:close()

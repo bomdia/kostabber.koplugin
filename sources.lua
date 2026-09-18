@@ -45,7 +45,11 @@ function sources.test_connection(url)
             return status >= 200 and status < 400, status
         end
     end
-    local ok_curl, code = util.command_success("curl -Lsf -o /dev/null " .. util.shell_quote(url))
+    local sink = util.join(paths.base, "_source_test.tmp")
+    local ok_curl, code = util.command_success("curl -Lsf -o " .. util.shell_quote(sink) .. " " .. util.shell_quote(url))
+    if util.file_exists(sink) then
+        os.remove(sink)
+    end
     return ok_curl, code
 end
 

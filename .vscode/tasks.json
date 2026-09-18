@@ -13,7 +13,7 @@
     {
       "label": "lua:run-focused-tests",
       "type": "shell",
-      "command": "lua main_test.lua && lua reader_hook_test.lua",
+      "command": "lua main_test.lua && lua reader_hook_test.lua && lua wizard_test.lua",
       "options": {
         "cwd": "${workspaceFolder}/tests"
       },

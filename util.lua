@@ -170,10 +170,6 @@ function util.load_lua_table(path, fallback)
     if not content:match("^%s*return%s*{") then
         return fallback, "unsafe_prefix"
     end
-    if content:match("%f[%a](function|while|repeat|until|for|do|if|then|else|end|local)%f[%A]") then
-        return fallback, "unsafe_tokens"
-    end
-
     local chunk
     local err
     if _VERSION == "Lua 5.1" then
@@ -336,44 +332,48 @@ function util.json_decode(text)
 
     local function parse_number()
         local start_i = i
-        if text:sub(i, i) == "-" then
+        local function current_char()
+            return text:sub(i, i)
+        end
+
+        if current_char() == "-" then
             i = i + 1
         end
 
-        local first = text:sub(i, i)
+        local first = current_char()
         if first == "0" then
             i = i + 1
-            if text:sub(i, i):match("%d") then
+            if current_char():match("^%d$") then
                 return PARSE_ERROR
             end
-        elseif first:match("[1-9]") then
+        elseif first:match("^[1-9]$") then
             i = i + 1
-            while text:sub(i, i):match("%d") do
+            while current_char():match("^%d$") do
                 i = i + 1
             end
         else
             return PARSE_ERROR
         end
 
-        if text:sub(i, i) == "." then
+        if current_char() == "." then
             i = i + 1
-            if not text:sub(i, i):match("%d") then
+            if not current_char():match("^%d$") then
                 return PARSE_ERROR
             end
-            while text:sub(i, i):match("%d") do
+            while current_char():match("^%d$") do
                 i = i + 1
             end
         end
 
-        if text:sub(i, i):match("[eE]") then
+        if current_char() == "e" or current_char() == "E" then
             i = i + 1
-            if text:sub(i, i):match("[%+%-]") then
+            if current_char() == "+" or current_char() == "-" then
                 i = i + 1
             end
-            if not text:sub(i, i):match("%d") then
+            if not current_char():match("^%d$") then
                 return PARSE_ERROR
             end
-            while text:sub(i, i):match("%d") do
+            while current_char():match("^%d$") do
                 i = i + 1
             end
         end

@@ -23,8 +23,7 @@ function context_menu.actions_for_stub(stub_path)
             id = "change_storage_strategy",
             text = "Cambia strategia storage",
             run = function(policy)
-                storage.set_policy(policy)
-                return true
+                return storage.set_policy(policy)
             end,
         },
     }
