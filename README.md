@@ -25,3 +25,11 @@ Configurabile con variabile `KOSTABBER_HOME` (default `~/.config/koreader/kostab
 - `cache/covers/*`
 - `assets/*`
 - `storage_ledger.json`
+
+## VS Code
+
+La cartella `.vscode/` include:
+
+- `extensions.json`: estensioni consigliate (LuaLS, EditorConfig)
+- `settings.json`: associazioni file e runtime Lua 5.1
+- `tasks.json`: task rapidi per syntax check e test focalizzati

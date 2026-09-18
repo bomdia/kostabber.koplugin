@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "lua:syntax-check",
+      "type": "shell",
+      "command": "for f in *.lua tests/*.lua; do luac -p \"$f\" || exit 1; done",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "lua:run-focused-tests",
+      "type": "shell",
+      "command": "lua main_test.lua && lua reader_hook_test.lua",
+      "options": {
+        "cwd": "${workspaceFolder}/tests"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

@@ -13,6 +13,13 @@ util.command_success("rm -rf " .. util.shell_quote(paths.base))
 paths.ensure()
 
 local stub = require('stub')
+local notifications = {}
+package.loaded['notify'] = {
+    show = function(msg)
+        notifications[#notifications + 1] = msg
+        return true
+    end,
+}
 local reader_hook = require('reader_hook')
 
 -- cached asset reuse
@@ -57,6 +64,8 @@ stub.save(download_stub, {
 local downloaded_path = reader_hook.resolve_local_path(download_stub)
 assert(downloaded_path and downloaded_path:match('%.epub$'))
 assert(util.file_exists(downloaded_path))
+assert(#notifications >= 1)
+assert(notifications[#notifications]:match('asset pronto'))
 
 -- download failure path propagates error
 package.loaded['network/http'] = {
@@ -86,6 +95,7 @@ stub.save(failed_stub, {
 local missing_path, err = reader_hook.resolve_local_path(failed_stub)
 assert(missing_path == nil)
 assert(err == 'download_failed')
+assert(notifications[#notifications]:match('download fallito'))
 
 util.command_success = old_command_success
 

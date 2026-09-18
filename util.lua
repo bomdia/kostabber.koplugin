@@ -315,6 +315,9 @@ function util.json_decode(text)
                     return PARSE_ERROR
                 end
             else
+                if c:byte() < 32 then
+                    return PARSE_ERROR
+                end
                 out[#out + 1] = c
                 i = i + 1
             end
@@ -323,11 +326,16 @@ function util.json_decode(text)
     end
 
     local function parse_number()
-        local start_i = i
-        while i <= len and text:sub(i, i):match("[%d%+%-%.eE]") do
-            i = i + 1
+        local tail = text:sub(i)
+        local token = tail:match("^%-?%d+%.%d+[eE][%+%-]?%d+")
+            or tail:match("^%-?%d+[eE][%+%-]?%d+")
+            or tail:match("^%-?%d+%.%d+")
+            or tail:match("^%-?%d+")
+        if not token then
+            return PARSE_ERROR
         end
-        local n = tonumber(text:sub(start_i, i - 1))
+        i = i + #token
+        local n = tonumber(token)
         if n == nil then
             return PARSE_ERROR
         end

@@ -66,7 +66,7 @@ local function parse_entries(xml, source_url)
         local download_url
         local cover_url
 
-        for link in entry_xml:gmatch("<link([^>]*)>") do
+        for link in entry_xml:gmatch("<link%s+([^>]-)%s*/?>") do
             local attrs = {}
             for key, value in link:gmatch('([%w:_-]+)%s*=%s*"([^"]*)"') do
                 attrs[key] = value
