@@ -39,7 +39,7 @@ function cover_cache.ensure(url)
     end
 
     local ok_curl = util.command_success("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(target))
-    if ok_curl then
+    if ok_curl and util.file_exists(target) then
         return target
     end
     return nil

@@ -38,9 +38,42 @@ deferred_finish()
 local state = util.load_lua_table(paths.state, {})
 assert(state.first_run_completed == true)
 
+-- init() real wizard fallback path without UI
+paths.base = '/tmp/kostabber-main-test-fallback'
+paths.sources = paths.base .. '/sources.lua'
+paths.state = paths.base .. '/state.lua'
+paths.stub_dir = paths.base .. '/sync'
+paths.cover_cache_dir = paths.base .. '/cache/covers'
+paths.asset_dir = paths.base .. '/assets'
+paths.storage_ledger = paths.base .. '/storage_ledger.json'
+util.command_success("rm -rf " .. util.shell_quote(paths.base))
+paths.ensure()
+
+local indexed = 0
+package.loaded['sources'] = {
+    is_configured = function()
+        return false
+    end,
+}
+package.loaded['opds'] = {
+    initial_index_all = function()
+        indexed = indexed + 1
+        return 0
+    end,
+}
+package.loaded['wizard'] = nil
+package.loaded['ui/widget/inputdialog'] = nil
+package.loaded['ui/uimanager'] = nil
+local main_real_wizard = dofile('../main.lua')
+main_real_wizard:init()
+local fallback_state = util.load_lua_table(paths.state, {})
+assert(fallback_state.first_run_completed == true)
+assert(indexed == 1)
+
 -- clear mocks and test normal dispatch behavior
 package.loaded['sources'] = nil
 package.loaded['wizard'] = nil
+package.loaded['opds'] = nil
 
 local stub = require('stub')
 local stub_path = paths.stub_dir .. '/abc123.kocloud'

@@ -97,6 +97,7 @@ local function parse_entries(xml, source_url)
 end
 
 local function fetch(url)
+    paths.ensure()
     local ok_http, http = pcall(require, "network/http")
     if ok_http and http and http.request then
         local ok, res = pcall(http.request, url, { method = "GET" })
