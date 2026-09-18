@@ -2,6 +2,7 @@ local util = require("util")
 local paths = require("paths")
 local sources = require("sources")
 local wizard = require("wizard")
+local opds = require("opds")
 
 local KoStabber = {
     name = "KoStabber",
@@ -25,6 +26,8 @@ function KoStabber:init()
             state.first_run_completed = true
             save_state(state)
         end)
+    else
+        opds.initial_index_all()
     end
 end
 

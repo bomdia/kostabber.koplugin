@@ -46,8 +46,10 @@ local function download_asset(url, stub_hash)
         local ok, res = pcall(http.request, url, { method = "GET" })
         local status = ok and res and tonumber(res.status or res.code or 0) or 0
         if ok and res and res.body and status > 0 and status < 400 then
-            util.write_file(target, res.body)
-            return target
+            local written = util.write_file(target, res.body)
+            if written and util.file_exists(target) then
+                return target
+            end
         end
     end
 

@@ -47,4 +47,11 @@ assert(saved_sources and #saved_sources == 0)
 assert(total2 == 0)
 assert(indexed == 3)
 
+allow_connection = false
+local unchecked, total3 = wizard.configure_sources({ { name = 'C', url = 'https://z' } }, false)
+assert(#unchecked == 1)
+assert(saved_sources and #saved_sources == 1)
+assert(total3 == 0)
+assert(indexed == 4)
+
 print('wizard tests passed')

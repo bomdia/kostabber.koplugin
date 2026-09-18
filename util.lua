@@ -176,7 +176,7 @@ function util.load_lua_table(path, fallback)
         chunk, err = loadstring(content, "@" .. path)
         if chunk and setfenv then
             setfenv(chunk, {})
-        else
+        elseif not chunk then
             return fallback, "unsafe_runtime"
         end
     else

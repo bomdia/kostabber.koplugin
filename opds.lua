@@ -132,7 +132,11 @@ function opds.index_source(source)
             if not item.cover_url then
                 item.cover_url = existing.cover_url
             end
-            item.local_asset_path = existing.local_asset_path
+            if existing.local_asset_path and util.file_exists(existing.local_asset_path) then
+                item.local_asset_path = existing.local_asset_path
+            else
+                item.local_asset_path = nil
+            end
             item.last_access_ts = existing.last_access_ts or item.last_access_ts
             item.read_progress = existing.read_progress or item.read_progress
         end
