@@ -164,6 +164,15 @@ function util.load_lua_table(path, fallback)
     if not content then
         return fallback
     end
+    if #content > 1024 * 1024 then
+        return fallback, "unsafe_file_size"
+    end
+    if not content:match("^%s*return%s*{") then
+        return fallback, "unsafe_prefix"
+    end
+    if content:match("%f[%a](function|while|repeat|until|for|do|if|then|else|end|local)%f[%A]") then
+        return fallback, "unsafe_tokens"
+    end
 
     local chunk
     local err
@@ -326,15 +335,50 @@ function util.json_decode(text)
     end
 
     local function parse_number()
-        local tail = text:sub(i)
-        local token = tail:match("^%-?%d+%.%d+[eE][%+%-]?%d+")
-            or tail:match("^%-?%d+[eE][%+%-]?%d+")
-            or tail:match("^%-?%d+%.%d+")
-            or tail:match("^%-?%d+")
-        if not token then
+        local start_i = i
+        if text:sub(i, i) == "-" then
+            i = i + 1
+        end
+
+        local first = text:sub(i, i)
+        if first == "0" then
+            i = i + 1
+            if text:sub(i, i):match("%d") then
+                return PARSE_ERROR
+            end
+        elseif first:match("[1-9]") then
+            i = i + 1
+            while text:sub(i, i):match("%d") do
+                i = i + 1
+            end
+        else
             return PARSE_ERROR
         end
-        i = i + #token
+
+        if text:sub(i, i) == "." then
+            i = i + 1
+            if not text:sub(i, i):match("%d") then
+                return PARSE_ERROR
+            end
+            while text:sub(i, i):match("%d") do
+                i = i + 1
+            end
+        end
+
+        if text:sub(i, i):match("[eE]") then
+            i = i + 1
+            if text:sub(i, i):match("[%+%-]") then
+                i = i + 1
+            end
+            if not text:sub(i, i):match("%d") then
+                return PARSE_ERROR
+            end
+            while text:sub(i, i):match("%d") do
+                i = i + 1
+            end
+        end
+
+        local token = text:sub(start_i, i - 1)
         local n = tonumber(token)
         if n == nil then
             return PARSE_ERROR

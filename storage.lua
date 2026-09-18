@@ -46,9 +46,16 @@ function storage.get_policy()
 end
 
 function storage.set_policy(policy_name)
+    if policy_name ~= storage.policy.none
+        and policy_name ~= storage.policy.manual_unlimited
+        and policy_name ~= storage.policy.fifo_cap
+        and policy_name ~= storage.policy.smart_inactivity then
+        return nil, "invalid_policy"
+    end
     local ledger = load_ledger()
     ledger.policy = policy_name
     save_ledger(ledger)
+    return true
 end
 
 function storage.record_access(stub_hash)

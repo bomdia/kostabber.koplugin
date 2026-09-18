@@ -127,6 +127,12 @@ function opds.index_source(source)
     for _, entry in ipairs(entries) do
         local item = stub.new(entry)
         local path = util.join(paths.stub_dir, item.hash .. ".kocloud")
+        local existing = stub.load(path)
+        if existing then
+            item.local_asset_path = existing.local_asset_path
+            item.last_access_ts = existing.last_access_ts or item.last_access_ts
+            item.read_progress = existing.read_progress or item.read_progress
+        end
         stub.save(path, item)
         if item.cover_url then
             cover_cache.ensure(item.cover_url)
