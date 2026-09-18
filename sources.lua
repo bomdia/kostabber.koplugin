@@ -45,8 +45,8 @@ function sources.test_connection(url)
             return status > 0 and status < 500, status
         end
     end
-    local ok_curl = os.execute("curl -Lsf -o /dev/null " .. util.shell_quote(url))
-    return ok_curl == true or ok_curl == 0, ok_curl
+    local ok_curl, code = util.command_success("curl -Lsf -o /dev/null " .. util.shell_quote(url))
+    return ok_curl, code
 end
 
 return sources

@@ -8,7 +8,7 @@ KoStabber è un plugin KOReader che indicizza feed OPDS e crea stub `.kocloud` p
 - `wizard.lua`: configurazione iniziale sorgenti OPDS
 - `sources.lua`: persistenza sorgenti in `sources.lua`
 - `opds.lua`: fetch + parsing feed OPDS + generazione stub
-- `stub.lua`: schema/storaging `.kocloud`
+- `stub.lua`: schema/storage `.kocloud`
 - `cover_cache.lua`: cache cover in `cache/covers/`
 - `list_renderer.lua`: title/subtitle/badge renderer data
 - `storage.lua`: policy engine (`none`, `manual_unlimited`, `fifo_cap`, `smart_inactivity`)

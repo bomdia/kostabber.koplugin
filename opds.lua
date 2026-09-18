@@ -13,21 +13,36 @@ end
 
 local function parse_entries(xml)
     local entries = {}
-    for entry_xml in xml:gmatch("<entry.-</entry>") do
-        local id = entry_xml:match("<id>(.-)</id>")
-        local title = entry_xml:match("<title[^>]*>(.-)</title>")
-        local author = entry_xml:match("<author>.-<name>(.-)</name>.-</author>")
+    for entry_xml in xml:gmatch("<entry[%s%S]-</entry>") do
+        local id = entry_xml:match("<id>([%s%S]-)</id>")
+        local title = entry_xml:match("<title[^>]*>([%s%S]-)</title>")
+        local author = entry_xml:match("<author>[%s%S]-<name>([%s%S]-)</name>[%s%S]-</author>")
         local series = entry_xml:match('<category[^>]-label="series"[^>]-term="([^"]+)"')
             or entry_xml:match('<meta[^>]-name="calibre:series"[^>]-content="([^"]+)"')
         local series_index = tonumber(entry_xml:match('<meta[^>]-name="calibre:series_index"[^>]-content="([^"]+)"'))
-        local download_url = entry_xml:match('<link[^>]-type="[^"]*acquisition[^"]*"[^>]-href="([^"]+)"')
-        local cover_url = entry_xml:match('<link[^>]-type="image/[^\"]+"[^>]-href="([^"]+)"')
+        local download_url
+        local cover_url
+
+        for link in entry_xml:gmatch("<link([^>]*)>") do
+            local attrs = {}
+            for key, value in link:gmatch('([%w:_-]+)%s*=%s*"([^"]*)"') do
+                attrs[key] = value
+            end
+            local link_type = attrs.type or ""
+            local href = attrs.href
+            if href and link_type:find("acquisition", 1, true) and not download_url then
+                download_url = href
+            end
+            if href and link_type:match("^image/") and not cover_url then
+                cover_url = href
+            end
+        end
 
         if id and title and download_url then
             entries[#entries + 1] = {
-                id = xml_unescape(id),
-                title = xml_unescape(title),
-                authors = author and { xml_unescape(author) } or {},
+                id = xml_unescape(id:gsub("^%s+", ""):gsub("%s+$", "")),
+                title = xml_unescape(title:gsub("^%s+", ""):gsub("%s+$", "")),
+                authors = author and { xml_unescape(author:gsub("^%s+", ""):gsub("%s+$", "")) } or {},
                 series = series and xml_unescape(series) or nil,
                 series_index = series_index,
                 remote_download_url = xml_unescape(download_url),
@@ -47,8 +62,8 @@ local function fetch(url)
         end
     end
     local tmp_path = util.join(paths.base, "_opds.xml")
-    local ok_curl = os.execute("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(tmp_path))
-    if ok_curl == true or ok_curl == 0 then
+    local ok_curl = util.command_success("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(tmp_path))
+    if ok_curl then
         local body = util.read_file(tmp_path)
         os.remove(tmp_path)
         return body

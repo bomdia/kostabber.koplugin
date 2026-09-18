@@ -6,6 +6,19 @@ local notify = require("notify")
 
 local reader_hook = {}
 
+local function list_stub_files(dir)
+    local handle = io.popen("find " .. util.shell_quote(dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
+    if not handle then
+        return {}
+    end
+    local out = {}
+    for line in handle:lines() do
+        out[#out + 1] = line
+    end
+    handle:close()
+    return out
+end
+
 local function download_asset(url, stub_hash)
     local target = util.join(paths.asset_dir, stub_hash .. ".epub")
     local ok_http, http = pcall(require, "network/http")
@@ -15,23 +28,10 @@ local function download_asset(url, stub_hash)
             util.write_file(target, res.body)
             return target
         end
-
-        local function list_stub_files(dir)
-            local handle = io.popen("find " .. util.shell_quote(dir) .. " -maxdepth 1 -name '*.kocloud' 2>/dev/null")
-            if not handle then
-                return {}
-            end
-            local out = {}
-            for line in handle:lines() do
-                out[#out + 1] = line
-            end
-            handle:close()
-            return out
-        end
     end
 
-    local ok_curl = os.execute("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(target))
-    if ok_curl == true or ok_curl == 0 then
+    local ok_curl = util.command_success("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(target))
+    if ok_curl then
         return target
     end
     return nil

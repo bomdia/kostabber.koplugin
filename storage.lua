@@ -27,9 +27,12 @@ local function load_ledger()
         ledger = {}
     end
     for k, v in pairs(DEFAULT_LEDGER) do
-        if ledger[k] == nil then
+        if k ~= "items" and ledger[k] == nil then
             ledger[k] = v
         end
+    end
+    if type(ledger.items) ~= "table" then
+        ledger.items = {}
     end
     return ledger
 end

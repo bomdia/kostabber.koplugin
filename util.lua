@@ -54,12 +54,26 @@ function util.mkdir_p(path)
     if not path or path == "" then
         return true
     end
-    os.execute("mkdir -p " .. util.shell_quote(path))
+    util.command_success("mkdir -p " .. util.shell_quote(path))
     return true
 end
 
 function util.now()
     return os.time()
+end
+
+function util.command_success(cmd)
+    local a, b, c = os.execute(cmd)
+    if type(a) == "number" then
+        return a == 0, a, b, c
+    end
+    if type(a) == "boolean" then
+        if b == "exit" then
+            return a and c == 0, a, b, c
+        end
+        return a, a, b, c
+    end
+    return false, a, b, c
 end
 
 function util.sha1_like(input)
@@ -93,7 +107,12 @@ local function serialize_value(value, depth)
 
     if t == "nil" then
         return "nil"
-    elseif t == "number" or t == "boolean" then
+    elseif t == "number" then
+        if value ~= value or value == math.huge or value == -math.huge then
+            return "null"
+        end
+        return tostring(value)
+    elseif t == "boolean" then
         return tostring(value)
     elseif t == "string" then
         return escape_lua_string(value)
@@ -229,6 +248,25 @@ function util.json_decode(text)
                 if map[esc] then
                     out[#out + 1] = map[esc]
                     i = i + 2
+                elseif esc == "u" then
+                    local hex = text:sub(i + 2, i + 5)
+                    if not hex:match("^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$") then
+                        return nil
+                    end
+                    local cp = tonumber(hex, 16)
+                    if cp <= 0x7F then
+                        out[#out + 1] = string.char(cp)
+                    elseif cp <= 0x7FF then
+                        local b1 = 0xC0 + math.floor(cp / 0x40)
+                        local b2 = 0x80 + (cp % 0x40)
+                        out[#out + 1] = string.char(b1, b2)
+                    else
+                        local b1 = 0xE0 + math.floor(cp / 0x1000)
+                        local b2 = 0x80 + (math.floor(cp / 0x40) % 0x40)
+                        local b3 = 0x80 + (cp % 0x40)
+                        out[#out + 1] = string.char(b1, b2, b3)
+                    end
+                    i = i + 6
                 else
                     return nil
                 end

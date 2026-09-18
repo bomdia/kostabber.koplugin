@@ -35,8 +35,8 @@ function cover_cache.ensure(url)
         end
     end
 
-    local ok_curl = os.execute("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(target))
-    if ok_curl == true or ok_curl == 0 then
+    local ok_curl = util.command_success("curl -Lsf " .. util.shell_quote(url) .. " -o " .. util.shell_quote(target))
+    if ok_curl then
         return target
     end
     return nil
