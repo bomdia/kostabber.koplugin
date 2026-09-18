@@ -42,7 +42,7 @@ function sources.test_connection(url)
         local ok, res = pcall(http.request, url, { method = "GET" })
         if ok and res then
             local status = tonumber(res.status or res.code or 0) or 0
-            return status > 0 and status < 500, status
+            return status >= 200 and status < 400, status
         end
     end
     local ok_curl, code = util.command_success("curl -Lsf -o /dev/null " .. util.shell_quote(url))
