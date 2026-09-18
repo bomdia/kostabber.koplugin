@@ -54,4 +54,27 @@ assert(saved_sources and #saved_sources == 1)
 assert(total3 == 0)
 assert(indexed == 4)
 
+-- parse UI multiline input, keep only valid Nome|URL lines
+local fake_input = "One|https://one\nbadline\nTwo|https://two\nNoUrl|\n|NoName"
+package.loaded['ui/widget/inputdialog'] = {
+    new = function(_, opts)
+        local dialog = { buttons = opts.buttons }
+        function dialog:getInputText()
+            return fake_input
+        end
+        return dialog
+    end,
+}
+package.loaded['ui/uimanager'] = {
+    show = function(_, dialog)
+        dialog.buttons[1][1].callback()
+    end,
+}
+package.loaded['wizard'] = nil
+local wizard_with_ui = dofile('../wizard.lua')
+wizard_with_ui.run_first_time(function() end)
+assert(saved_sources and #saved_sources == 2)
+assert(saved_sources[1].name == 'One' and saved_sources[2].name == 'Two')
+assert(indexed == 5)
+
 print('wizard tests passed')

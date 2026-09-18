@@ -174,13 +174,19 @@ function util.load_lua_table(path, fallback)
     local err
     if _VERSION == "Lua 5.1" then
         chunk, err = loadstring(content, "@" .. path)
-        if chunk and setfenv then
+        if not chunk then
+            return fallback, err
+        end
+        if setfenv then
             setfenv(chunk, {})
-        elseif not chunk then
-            return fallback, "unsafe_runtime"
         end
     else
-        chunk, err = load(content, "@" .. path, "t", {})
+        local ok, loaded, load_err = pcall(load, content, "@" .. path, "t", {})
+        if ok then
+            chunk, err = loaded, load_err
+        else
+            chunk, err = nil, loaded
+        end
     end
     if not chunk then
         return fallback, err

@@ -71,6 +71,11 @@ local function parse_entries(xml, source_url)
             for key, value in link:gmatch('([%w:_-]+)%s*=%s*"([^"]*)"') do
                 attrs[key] = value
             end
+            for key, value in link:gmatch("([%w:_-]+)%s*=%s*'([^']*)'") do
+                if attrs[key] == nil then
+                    attrs[key] = value
+                end
+            end
             local link_type = attrs.type or ""
             local href = attrs.href
             if href and link_type:find("acquisition", 1, true) and not download_url then

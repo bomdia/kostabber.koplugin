@@ -64,6 +64,11 @@ stub.save(download_stub, {
 local downloaded_path = reader_hook.resolve_local_path(download_stub)
 assert(downloaded_path and downloaded_path:match('%.epub$'))
 assert(util.file_exists(downloaded_path))
+local updated_stub = stub.load(download_stub)
+assert(updated_stub.local_asset_path == downloaded_path)
+assert(type(updated_stub.last_access_ts) == 'number' and updated_stub.last_access_ts > 0)
+local ledger = util.json_decode(util.read_file(paths.storage_ledger) or '{}')
+assert(ledger and ledger.items and ledger.items['download-hash'])
 assert(#notifications >= 1)
 assert(notifications[#notifications]:match('asset pronto'))
 

@@ -10,7 +10,8 @@ local function ui_dialog_add_sources(callback)
     end
 
     local name, url
-    local dialog = InputDialog:new({
+    local dialog
+    dialog = InputDialog:new({
         title = "KoStabber: nuova sorgente OPDS",
         input = "",
         description = "Inserisci una sorgente per riga: Nome|URL",
