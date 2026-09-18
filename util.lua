@@ -64,6 +64,9 @@ function util.mkdir_p(path)
     if not path or path == "" then
         return true
     end
+    if package.config:sub(1, 1) == "\\" then
+        return util.command_success("if not exist " .. util.shell_quote(path) .. " mkdir " .. util.shell_quote(path))
+    end
     return util.command_success("mkdir -p " .. util.shell_quote(path))
 end
 

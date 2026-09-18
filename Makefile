@@ -24,7 +24,7 @@ syntax-check:
 
 test:
 	@test -n "$(LUA)" || (echo "lua non trovato (installa lua5.1)"; exit 1)
-	@cd tests && $(LUA) main_test.lua && $(LUA) reader_hook_test.lua && $(LUA) wizard_test.lua
+	@cd tests && $(LUA) main_test.lua && $(LUA) reader_hook_test.lua && $(LUA) wizard_test.lua && $(LUA) util_test.lua
 
 release-build: syntax-check test
 	@test -n "$(LUA)" || (echo "lua non trovato (installa lua5.1)"; exit 1)

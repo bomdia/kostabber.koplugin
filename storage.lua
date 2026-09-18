@@ -71,11 +71,16 @@ function storage.record_access(stub_hash)
 end
 
 local function remove_local_asset(stub_path, item)
+    local removed = true
     if item.local_asset_path and util.file_exists(item.local_asset_path) then
-        os.remove(item.local_asset_path)
+        removed = os.remove(item.local_asset_path)
+    end
+    if removed == false then
+        return nil, "remove_failed"
     end
     item.local_asset_path = nil
     stub.save(stub_path, item)
+    return true
 end
 
 local function should_remove_smart(ledger, last_access)

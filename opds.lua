@@ -169,6 +169,7 @@ function opds.index_source(source)
         end
         if existing then
             item.hash = existing.hash or item.hash
+            path = util.join(paths.stub_dir, item.hash .. ".kocloud")
             if not item.cover_url then
                 item.cover_url = existing.cover_url
             end
